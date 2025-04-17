@@ -1,17 +1,59 @@
 #include <iostream>
+#include <string.h>
+#include <string>
+#include <unistd.h>
 #include <pthread.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
-void* print(void* arg) {
-    std::cout << "hello world!" << std::endl;
-    pthread_exit(nullptr);
-}
+#define PORT 8080
 
 int main(int argc, char** argv) {
-    pthread_t thr;
+    //Criando um Socket TCP IPv4 pra listening
+    int listening_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (listening_socket <= 0) {
+        std::cerr << "Failed creating listenig\n";
+        return -1;
+    }
 
-    pthread_create(&thr, nullptr, print, nullptr);
-    pthread_join(thr, nullptr);
+    // Definindo endereço de acesso do socket
+    sockaddr_in address;
+    int addrlen = sizeof(address);
 
-    std::cout << "success!";
+    address.sin_family = AF_INET;         // IPv4
+    address.sin_addr.s_addr = INADDR_ANY; // permite conectar por qualquer interface de rede
+    address.sin_port = htons(PORT);       // definição da porta e ajuste de endian
+
+    // vinculando socket listening com endreço
+    if (bind(listening_socket, (struct sockaddr*)&address, sizeof(address)) < 0) {
+        std::cerr << "Failed binding address\n";
+        close(listening_socket);
+        return -1;
+    }
+
+
+    // iniciando socket listenig, permitindo até 3 conexões
+    if (listen(listening_socket, 3) < 0) {
+        std::cerr << "Failed starting listening\n";
+        close(listening_socket);
+        return -1;
+    }
+
+    // aceitando conexão
+    int new_socket = accept(listening_socket, (struct sockaddr*)&address, (socklen_t*)&addrlen);
+    if (new_socket < 0) {
+        std::cerr << "Failed accepting connection\n";
+        close(listening_socket);
+        return -1;
+    }
+
+
+    std::string response = "Hello Client!\n";
+    send(new_socket, response.c_str(), response.size(), 0);
+
+    close(new_socket);
+    close(listening_socket);
+    
     return 0;
 }

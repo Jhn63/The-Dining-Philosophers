@@ -3,13 +3,13 @@ Implementation and resolution of the synchronization problem: The Dining Philoso
 
 ## follow the steps to run project locally
 
-# Option 1
+### Option 1
 you must have Docker installed in your machine, get on [Docker](https://www.docker.com)
 
 - docker build -t app .
 - docker run app
 
-# Option 2
+### Option 2
 ONLY if you are in a Ubuntu machine. Make sure to have g++ compiler intalled
 
 - g++ --version

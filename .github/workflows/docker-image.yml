@@ -17,3 +17,10 @@ jobs:
     
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    
+    - name: Push to Docker Hub
+      use: docker/build-push-action@v1
+      with:
+        username: ${{ secrects.DOCKER_USERNAME }}
+        password: ${{ secrects.DOCKER_PASSWORD }}
+        repository: jhn63/app

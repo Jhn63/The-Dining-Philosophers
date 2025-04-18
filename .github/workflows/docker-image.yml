@@ -26,3 +26,20 @@ jobs:
 
     - name: Push to Docker Hub
       run: docker push ${{ secrets.DOCKER_USERNAME }}/app:latest
+    
+  restart:
+    name: Restart Azure Container
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Restart Container Instance
+      run: |
+        az container restart \
+          --name thediningphilosophers \
+          --resource-group ufpb

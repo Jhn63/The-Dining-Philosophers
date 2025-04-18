@@ -8,7 +8,9 @@ you must have Docker installed in your machine, get on [Docker](https://www.dock
 
 - docker build -t app .
 - docker run -p 8080:8080 app
-- open connection in docker desktop
+
+- in your browser type localhost:8080
+- or in terminal type: nc localhost:8080 or telnet localhost:8080
 
 ### Option 2
 ONLY if you are in a Ubuntu machine. Make sure to have g++ compiler intalled
@@ -22,3 +24,6 @@ getting gnu compilers <br>
 compiling and run <br>
 - g++ -o apl src/*.cpp
 - ./apl
+
+connect via another terminal
+- nc localhost:8080 or telnet localhost:8080

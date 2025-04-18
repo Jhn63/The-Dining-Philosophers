@@ -13,7 +13,6 @@ int main(int argc, char** argv) {
     //Criando um Socket TCP IPv4 pra listening
     int listening_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (listening_socket <= 0) {
-        std::cerr << "Failed creating listenig\n";
         return -1;
     }
 
@@ -25,35 +24,36 @@ int main(int argc, char** argv) {
     address.sin_addr.s_addr = INADDR_ANY; // permite conectar por qualquer interface de rede
     address.sin_port = htons(PORT);       // definição da porta e ajuste de endian
 
+    int opt = 1;
+    setsockopt(listening_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
     // vinculando socket listening com endreço
     if (bind(listening_socket, (struct sockaddr*)&address, sizeof(address)) < 0) {
-        std::cerr << "Failed binding address\n";
         close(listening_socket);
-        return -1;
+        return -2;
     }
 
 
     // iniciando socket listenig, permitindo até 3 conexões
     if (listen(listening_socket, 3) < 0) {
-        std::cerr << "Failed starting listening\n";
         close(listening_socket);
-        return -1;
+        return -3;
     }
 
     // aceitando conexão
-    int new_socket = accept(listening_socket, (struct sockaddr*)&address, (socklen_t*)&addrlen);
-    if (new_socket < 0) {
-        std::cerr << "Failed accepting connection\n";
-        close(listening_socket);
-        return -1;
+    while (true) {
+        int new_socket = accept(listening_socket, (struct sockaddr*)&address, (socklen_t*)&addrlen);
+        if (new_socket < 0) {
+            close(listening_socket);
+            return -4;
+        }
+
+        std::string response = "Hello Client!\n";
+        send(new_socket, response.c_str(), response.size(), 0);
+
+        close(new_socket);
     }
 
-
-    std::string response = "Hello Client!\n";
-    send(new_socket, response.c_str(), response.size(), 0);
-
-    close(new_socket);
     close(listening_socket);
-    
     return 0;
 }

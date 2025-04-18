@@ -7,7 +7,8 @@ Implementation and resolution of the synchronization problem: The Dining Philoso
 you must have Docker installed in your machine, get on [Docker](https://www.docker.com)
 
 - docker build -t app .
-- docker run app
+- docker run -p 8080:8080 app
+- open connection in docker desktop
 
 ### Option 2
 ONLY if you are in a Ubuntu machine. Make sure to have g++ compiler intalled

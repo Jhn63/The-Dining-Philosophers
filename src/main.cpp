@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
             return -4;
         }
 
-        std::string response = "Hello Test!\n";
+        std::string response = "Hello Change!\n";
         send(new_socket, response.c_str(), response.size(), 0);
 
         close(new_socket);

@@ -149,3 +149,7 @@ telnet localhost:8080
 |-------|--------------|
 | Paulo | Created the synchronization methods using both Semaphores and POSIX Monitors; Also defined the interface. |
 | João  | Code adaptation for a server-based application; CI/CD usage with github actions; Deployment in Azure platform |
+
+## App running video
+
+https://youtu.be/FQgS47vbY6Y

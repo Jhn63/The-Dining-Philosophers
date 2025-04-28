@@ -14,8 +14,8 @@ public:
      * @brief Construtor para a mesa com monitores POSIX
      * @param numPhilosophers O número de filósofos na mesa (padrão: 5)
      */
-    PosixDiningTable(int numPhilosophers = 5)
-        : DiningTable(numPhilosophers) {
+    PosixDiningTable(int numPhilosophers, int socketnum)
+        : DiningTable(numPhilosophers, socketnum) {
         // Inicializa o mutex e as variáveis de condição
         pthread_mutex_init(&mutex, NULL);
         
@@ -40,9 +40,10 @@ public:
      * @brief Executa a simulação dos filósofos
      */
     void run() override {
-        std::cout << "Iniciando simulação com " << philosophers.size() << " filósofos.\n";
-        std::cout << "Implementação usando monitores POSIX.\n" << std::endl;
-        std::cout << "Esta implementação permite starvation." << std::endl;
+        std::string msg = std::format("Iniciando simulação com {} filósofos.\n", philosophers.size());
+        msg = msg + "Implementação usando monitores POSIX.\n\n";
+        msg = msg + "Esta implementação permite starvation.\n";
+        send(socketID, msg.c_str(), msg.size(), 0);
 
         // Armazena threads em um vetor
         std::vector<pthread_t> threads(philosophers.size());
@@ -59,7 +60,8 @@ public:
             pthread_join(thread, NULL);
         }
         
-        std::cout << "Simulação finalizada.\n";
+        msg = "Simulação finalizada.\n";
+        send(socketID, msg.c_str(), msg.size(), 0);
     }
 
     /**
@@ -133,8 +135,12 @@ private:
         test(philosopher_number);
         
         // Se não conseguiu comer, espera até que possa
+        std::string msg;
+
         while (philosophers[philosopher_number]->getState() == State::HUNGRY) {
-            std::cout << "Filósofo " << philosopher_number << " está esperando para comer\n";
+            msg = std::format("Filósofo {} está esperando para comer\n", philosopher_number);
+            send(socketID, msg.c_str(), msg.size(), 0);
+
             pthread_cond_wait(&cond[philosopher_number], &mutex);
         }
         

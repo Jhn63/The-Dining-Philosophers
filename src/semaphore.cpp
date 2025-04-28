@@ -15,8 +15,8 @@ public:
      * @brief Construtor para a mesa com semáforos
      * @param numPhilosophers O número de filósofos na mesa (padrão: 5)
      */
-    SemaphoreDiningTable(int numPhilosophers = 5)
-        : DiningTable(numPhilosophers) {
+    SemaphoreDiningTable(int numPhilosophers, int socketnum)
+        : DiningTable(numPhilosophers, socketnum) {
         // Inicializa os semáforos para os palitos (todos disponíveis inicialmente)
         chopstickSemaphores.clear(); // Garante que o vetor esteja vazio
         for (int i = 0; i < numPhilosophers; i++) {
@@ -28,8 +28,10 @@ public:
      * @brief Executa a simulação dos filósofos usando semáforos
      */
     void run() override {
-        std::cout << "Iniciando simulação com " << philosophers.size() << " filósofos.\n";
-        std::cout << "Esta implementação permite deadlocks.\n" << std::endl;
+        std::string msg = std::format("Iniciando simulação com {} filósofos.\n", philosophers.size());
+        msg = msg + "Esta implementação permite deadlocks.\n\n";
+
+        send(socketID, msg.c_str(), msg.size(), 0);
         
         // Cria uma thread para cada filósofo
         std::vector<std::thread> threads;
@@ -44,7 +46,8 @@ public:
             }
         }
         
-        std::cout << "Simulação finalizada.\n";
+        msg = "Simulação finalizada.\n";
+        send(socketID, msg.c_str(), msg.size(), 0);
     }
 
     /**
@@ -63,6 +66,7 @@ private:
      * @param philosopherId ID do filósofo
      */
     void philosopherLifecycle(int philosopherId) {
+        std::string msg;
         while (running) {
             // Pensar
             philosophers[philosopherId]->think();
@@ -72,12 +76,16 @@ private:
             int rightChopstick = (philosopherId + 1) % philosophers.size();
             
             // Tenta pegar o palito esquerdo
-            std::cout << "Filósofo " << philosopherId << " tentando pegar o palito esquerdo\n";
+            msg = std::format ("Filósofo {} tentando pegar o palito esquerdo\n", philosopherId);
+            send(socketID, msg.c_str(), msg.size(), 0);
+
             chopstickSemaphores[leftChopstick]->acquire();
             philosophers[philosopherId]->pickUpLeftChopstick();
             
             // Tenta pegar o palito direito
-            std::cout << "Filósofo " << philosopherId << " tentando pegar o palito direito\n";
+            msg = std::format ("Filósofo {} tentando pegar o palito direito\n", philosopherId);
+            send(socketID, msg.c_str(), msg.size(), 0);
+
             chopstickSemaphores[rightChopstick]->acquire();
             philosophers[philosopherId]->pickUpRightChopstick();
             

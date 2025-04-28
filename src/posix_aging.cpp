@@ -17,8 +17,8 @@ public:
      * @brief Construtor para a mesa com monitores POSIX e aging
      * @param numPhilosophers O número de filósofos na mesa (padrão: 5)
      */
-    PosixAgingDiningTable(int numPhilosophers = 5)
-        : DiningTable(numPhilosophers) {
+    PosixAgingDiningTable(int numPhilosophers, int socketnum)
+        : DiningTable(numPhilosophers, socketnum) {
         // Inicializa o mutex e as variáveis de condição
         pthread_mutex_init(&mutex, NULL);
         
@@ -55,9 +55,10 @@ public:
      * @brief Executa a simulação dos filósofos
      */
     void run() override {
-        std::cout << "Iniciando simulação com " << philosophers.size() << " filósofos.\n";
-        std::cout << "Implementação usando monitores POSIX com mecanismo de aging.\n";
-        std::cout << "Esta implementação previne starvation." << std::endl;
+        std::string msg = std::format("Iniciando simulação com {} filósofos.\n", philosophers.size());
+        msg = msg + "Implementação usando monitores POSIX com mecanismo de aging.\n";
+        msg = msg + "Esta implementação previne starvation.\n";
+        send(socketID, msg.c_str(), msg.size(), 0);
 
         // Armazena threads em um vetor
         std::vector<pthread_t> threads(philosophers.size());
@@ -74,7 +75,8 @@ public:
             pthread_join(thread, NULL);
         }
         
-        std::cout << "Simulação finalizada.\n";
+        msg = "Simulação finalizada.\n";
+        send(socketID, msg.c_str(), msg.size(), 0);
     }
 
     /**
@@ -187,12 +189,17 @@ private:
         testWithAging();
         
         // Se não conseguiu comer, espera até que possa
+        std::string msg;
+
         while (philosophers[philosopher_number]->getState() == State::HUNGRY) {
             // Incrementa o contador de espera a cada tentativa frustrada
             waitingTime[philosopher_number]++;
-            std::cout << "Filósofo " << philosopher_number << " aguardando (tempo de espera: " 
-                      << waitingTime[philosopher_number] << ")\n";
-            
+
+            msg = std::format("Filósofo {} aguardando (tempo de espera: {})\n", 
+                        philosopher_number,
+                        waitingTime[philosopher_number]);
+            send(socketID, msg.c_str(), msg.size(), 0);
+
             // Espera ser sinalizado
             pthread_cond_wait(&cond[philosopher_number], &mutex);
         }

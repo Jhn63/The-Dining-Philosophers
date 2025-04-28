@@ -71,22 +71,45 @@ This implementation extends the POSIX Monitors approach by adding an aging mecha
 
 This approach ensures that no philosopher can be indefinitely blocked from eating, as their priority continuously increases until they're selected, even in unfavorable positions.
 
-## How to Compile and Execute
+## How Execute
 
-### Prerequisites
+### Option 1: Runnig locally
+
+#### Prerequisites
+- Only on Ubuntu based machine
 - C++ compiler with C++20 support
 - Make sure you have the necessary directory structure: `bin/`, `include/`, and `src/`
 
-### Compilation
+#### Compilation
 Run the following command to compile the project:
 
 ```bash
 g++ src/main.cpp src/semaphore.cpp src/posix.cpp src/posix_aging.cpp -o bin/philosophers -I include -std=c++20
 ```
 
-### Running the Application
+#### Running the Application
+After compilation, execute the binary:
 
-#### Option 1: Using Docker
+```bash
+# Run the program
+./bin/philosophers
+```
+Then in another terminal connect to the application
+
+```bash
+# Run the program
+nc localhost:8080
+```
+
+or
+
+```bash
+# Run the program
+telnet localhost:8080
+```
+
+
+### Option 2: Using Docker
 If you have Docker installed, you can build and run the application as follows:
 
 ```bash
@@ -97,18 +120,19 @@ docker build -t philosophers .
 docker run -p 8080:8080 philosophers
 ```
 
-Then connect to the application:
-- In your browser: `localhost:8080`
-- Or in terminal: `nc localhost:8080` or `telnet localhost:8080`
-
-#### Option 2: Running Locally
-After compilation, execute the binary:
+Then in another terminal connect to the application
 
 ```bash
-# Run the program
-./bin/philosophers
+# Connecting
+nc localhost:8080
 ```
 
+or
+
+```bash
+# Connecting
+telnet localhost:8080
+```
 ## Usage Instructions
 
 1. Choose an option from the menu by entering the corresponding number:
@@ -121,7 +145,7 @@ After compilation, execute the binary:
 
 ## Project Contributors
 
-| Name | Contributions |
-|------|--------------|
+| Name  | Contributions |
+|-------|--------------|
 | Paulo | Created the synchronization methods using both Semaphores and POSIX Monitors; Also defined the interface. |
-| João | [Description of contributions] |
+| João  | Code adaptation for a server-based application; CI/CD usage with github actions; Deployment in Azure platform |

@@ -12,6 +12,12 @@
 #include <iostream>
 #include "philosophers.h"
 
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <format>
+
 /**
  * @brief Interface para a mesa no problema dos Filósofos Jantantes
  */
@@ -21,7 +27,7 @@ public:
      * @brief Construtor para a mesa
      * @param numPhilosophers O número de filósofos na mesa (padrão: 5)
      */
-    DiningTable(int numPhilosophers = 5);
+    DiningTable(int numPhilosophers, int socketnum);
 
     /**
      * @brief Destrutor virtual
@@ -43,18 +49,21 @@ public:
     }
 
 protected:
+    int socketID;
+
     std::vector<std::unique_ptr<Philosopher>> philosophers; ///< Vetor de filósofos
     std::vector<std::unique_ptr<std::mutex>> chopsticks;    ///< Vetor de mutex para os palitos
 };
 
 // Implementação do construtor
-inline DiningTable::DiningTable(int numPhilosophers) {
-    std::cout << "DiningTable: Inicializando com " << numPhilosophers << " filósofos" << std::endl;
+inline DiningTable::DiningTable(int numPhilosophers, int socketnum) : socketID(socketnum) {
+    std::string msg = std::format("DiningTable: Inicializando com {} filósofos\n ", numPhilosophers); 
+    send(socketID, msg.c_str(), msg.size(), 0);
     
     // Inicializa o vetor de filósofos
     philosophers.clear();
     for (int i = 0; i < numPhilosophers; i++) {
-        philosophers.push_back(std::make_unique<Philosopher>(i));
+        philosophers.push_back(std::make_unique<Philosopher>(i, socketID));
     }
     
     // Inicializa o vetor de palitos (mutex)
@@ -63,8 +72,8 @@ inline DiningTable::DiningTable(int numPhilosophers) {
         chopsticks.push_back(std::make_unique<std::mutex>());
     }
     
-    std::cout << "DiningTable: Criados " << philosophers.size() << " filósofos e " 
-              << chopsticks.size() << " palitos" << std::endl;
+    msg = std::format("DiningTable: Criados {} filósofos e {} palitos", philosophers.size(), chopsticks.size());
+    send(socketID, msg.c_str(), msg.size(), 0);
 }
 
 #endif // DINING_TABLE_H 

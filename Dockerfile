@@ -1,7 +1,7 @@
 FROM ubuntu:latest
-RUN apt update && apt install -y g++
-COPY . /app
+RUN apt update && apt install -y build-essential
 WORKDIR /app
-RUN g++ -o apl src/main.cpp
+COPY .. /app
+RUN make
 EXPOSE 8080
 CMD ["./apl"]

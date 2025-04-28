@@ -1,59 +1,70 @@
 #include <iostream>
-#include <string.h>
-#include <string>
-#include <unistd.h>
-#include <pthread.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <locale>
+#include "semaphore.cpp"
+#include "posix.cpp"
+#include "posix_aging.cpp"
 
-#define PORT 8080
+int main() {
+    // Configurar locale para exibir caracteres acentuados corretamente
+    std::setlocale(LC_ALL, "pt_BR.UTF-8");
+    
+    int option = 0;
+    bool running = true;
 
-int main(int argc, char** argv) {
-    //Criando um Socket TCP IPv4 pra listening
-    int listening_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (listening_socket <= 0) {
-        return -1;
-    }
+    while (running) {
+        // Título e Menu
+        std::cout << "\n ######   ##   ##  #######           #####     ####    ##   ##   ####    ##   ##    ####            ######   ##   ##   ####    ####      #####    #####    #####   ######   ##   ##  #######  ######    #####" << std::endl;
+        std::cout << " # ## #   ##   ##   ##   #            ## ##     ##     ###  ##    ##     ###  ##   ##  ##            ##  ##  ##   ##    ##      ##      ##   ##  ##   ##  ##   ##   ##  ##  ##   ##   ##   #   ##  ##  ##   ##" << std::endl;
+        std::cout << "   ##     ##   ##   ## #              ##  ##    ##     #### ##    ##     #### ##  ##                 ##  ##  ##   ##    ##      ##      ##   ##  #        ##   ##   ##  ##  ##   ##   ## #     ##  ##  #" << std::endl;
+        std::cout << "   ##     #######   ####              ##  ##    ##     ## ####    ##     ## ####  ##                 #####   #######    ##      ##      ##   ##   #####   ##   ##   #####   #######   ####     #####    #####" << std::endl;
+        std::cout << "   ##     ##   ##   ## #              ##  ##    ##     ##  ###    ##     ##  ###  ##  ###            ##      ##   ##    ##      ##   #  ##   ##       ##  ##   ##   ##      ##   ##   ## #     ## ##        ##" << std::endl;
+        std::cout << "   ##     ##   ##   ##   #            ## ##     ##     ##   ##    ##     ##   ##   ##  ##            ##      ##   ##    ##      ##  ##  ##   ##  ##   ##  ##   ##   ##      ##   ##   ##   #   ##  ##  ##   ##" << std::endl;
+        std::cout << "  ####    ##   ##  #######           #####     ####    ##   ##   ####    ##   ##    #####           ####     ##   ##   ####    #######   #####    #####    #####   ####     ##   ##  #######  #### ##   #####" << std::endl;
+        std::cout << std::endl;
 
-    // Definindo endereço de acesso do socket
-    sockaddr_in address;
-    int addrlen = sizeof(address);
+        std::cout << "1. Método por Semáforo" << std::endl;
+        std::cout << "2. Método com monitores POSIX" << std::endl;
+        std::cout << "3. Método com monitores POSIX e Aging (Anti-Starvation)" << std::endl;
+        std::cout << "4. Sair" << std::endl;
+        std::cout << "Escolha uma opção: ";
+        std::cin >> option;
+        std::cout << std::endl;
 
-    address.sin_family = AF_INET;         // IPv4
-    address.sin_addr.s_addr = INADDR_ANY; // permite conectar por qualquer interface de rede
-    address.sin_port = htons(PORT);       // definição da porta e ajuste de endian
+        // Handle options
+        switch (option) {
+            case 1:
+                // Método por Semáforo
+                {
+                    SemaphoreDiningTable table;
+                    table.run(); // A execução continuará indefinidamente até ser interrompida
+                }
+                break;
+            case 2:
+                // Método com monitores POSIX
+                {
+                    PosixDiningTable table;
+                    table.run(); // A execução continuará indefinidamente até ser interrompida
+                }
+                break;
+            
+            case 3:
+                // Método com monitores POSIX com mecanismo de Aging
+                {
+                    PosixAgingDiningTable table;
+                    table.run(); // A execução continuará indefinidamente até ser interrompida
+                }
+                break;
+            
+            case 4:
+                std::cout << "Saindo do programa..." << std::endl;
+                running = false;
+                break;
 
-    int opt = 1;
-    setsockopt(listening_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-
-    // vinculando socket listening com endreço
-    if (bind(listening_socket, (struct sockaddr*)&address, sizeof(address)) < 0) {
-        close(listening_socket);
-        return -2;
-    }
-
-
-    // iniciando socket listenig, permitindo até 3 conexões
-    if (listen(listening_socket, 3) < 0) {
-        close(listening_socket);
-        return -3;
-    }
-
-    // aceitando conexão
-    while (true) {
-        int new_socket = accept(listening_socket, (struct sockaddr*)&address, (socklen_t*)&addrlen);
-        if (new_socket < 0) {
-            close(listening_socket);
-            return -4;
+            default:
+                std::cout << "Opção inválida. Por favor, selecione uma opção entre 1 e 4." << std::endl;
+                option = 0;
+                break;
         }
-
-        std::string response = "Hello Change!\n";
-        send(new_socket, response.c_str(), response.size(), 0);
-
-        close(new_socket);
     }
-
-    close(listening_socket);
     return 0;
 }

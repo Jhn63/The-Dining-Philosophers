@@ -1,0 +1,50 @@
+# Compiled binaries
+bin/
+*.o
+*.out
+*.exe
+philosophers
+
+# Build directories
+build/
+cmake-build-*/
+
+# IDE files
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# OS specific files
+.DS_Store
+Thumbs.db
+.directory
+
+# Dependency directories
+vendor/
+node_modules/
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Precompiled headers
+*.gch
+*.pch
+
+# Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Static libraries
+*.a
+*.lib
+
+# Application logs
+*.log 
